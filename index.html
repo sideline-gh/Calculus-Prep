@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cultural Studies & Calculus 1 Trainer</title>
+
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-secondary: #0f172a;
+    --ink: #f8fafc;
+    --muted: #94a3b8;
+    --line: #334155;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-soft: rgba(59, 130, 246, 0.15);
+    --ok: #10b981;
+    --ok-soft: rgba(16, 185, 129, 0.15);
+    --danger: #ef4444;
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    --back: #2a2619;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .app-container {
+    width: 100%;
+    max-width: 760px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Header & Navigation */
+  header {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: 1.35rem;
+    margin: 0 0 4px 0;
+    font-weight: 700;
+  }
+
+  header p {
+    margin: 0 0 12px 0;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  .nav-tabs {
+    display: flex;
+    background: var(--card);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    gap: 4px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px 8px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    background: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  }
+
+  /* Main Views */
+  .view {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .view.active {
+    display: flex;
+  }
+
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  /* Controls & Inputs */
+  .controls-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  select, input[type="search"] {
+    flex: 1;
+    min-width: 130px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--card-secondary);
+    color: var(--ink);
+    font-size: 0.88rem;
+    outline: none;
+  }
+
+  .btn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.88rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-outline { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+
+  .badge {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* Math Formatting Components */
+  .frac {
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    text-align: center;
+    padding: 0 4px;
+  }
+  .frac .num { border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+  .frac .den { padding-top: 1px; }
+  .sqrt { border-top: 1px solid var(--ink); padding-left: 2px; }
+  sup, sub { font-size: 0.75em; line-height: 0; position: relative; vertical-align: baseline; }
+  sup { top: -0.5em; }
+  sub { bottom: -0.25em; }
+
+  /* 1. Cultural Studies Single Flashcard */
+  .flashcard-stage {
+    perspective: 1000px;
+    width: 100%;
+    margin: 10px 0 16px;
+  }
+
+  .flashcard {
+    width: 100%;
+    min-height: 220px;
+    background: var(--card-secondary);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: transform 0.3s ease, background 0.2s;
+  }
+
+  .flashcard.flipped {
+    background: var(--back);
+    border-color: #52431f;
+  }
+
+  .flashcard-text {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    margin: 16px 0;
+    white-space: pre-line;
+  }
+
+  .flashcard-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .card-nav {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .card-nav button {
+    flex: 1;
+    padding: 12px;
+  }
+
+  /* Progress bar */
+  .bar {
+    height: 6px;
+    background: var(--line);
+    border-radius: 3px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .bar > div {
+    height: 100%;
+    width: 0;
+    background: var(--ok);
+    transition: width .3s;
+  }
+
+  /* 2. Calculus Practice Box */
+  .problem-box {
+    background: var(--card-secondary);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    margin: 10px 0 16px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.15rem;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  @media (min-width: 520px) {
+    .options-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .option-btn {
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--card-secondary);
+    color: var(--ink);
+    text-align: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .option-btn.correct {
+    background: var(--ok-soft) !important;
+    border-color: var(--ok) !important;
+    color: #4ade80 !important;
+  }
+
+  .option-btn.incorrect {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: var(--danger) !important;
+    color: #f87171 !important;
+  }
+
+  .solution-box {
+    display: none;
+    background: var(--card-secondary);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .solution-box.visible { display: block; }
+
+  .formula-card {
+    background: var(--card-secondary);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .formula-title { font-size: 0.8rem; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+  .formula-math { font-size: 1.05rem; margin: 6px 0; }
+  .formula-note { font-size: 0.8rem; color: #cbd5e1; }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <header>
+    <h1>Study & Practice Hub</h1>
+    <p>Cultural Studies Flashcards + Calculus 1 Derivative Practice</p>
+
+    <div class="nav-tabs">
+      <button id="tab-culture" class="tab-btn active">Cultural Studies</button>
+      <button id="tab-calc-quiz" class="tab-btn">Calculus Quiz</button>
+      <button id="tab-calc-sheet" class="tab-btn">Calculus Sheet</button>
+    </div>
+  </header>
+
+  <!-- 1. CULTURAL STUDIES VIEW -->
+  <div id="view-culture" class="view active">
+    <div class="panel">
+      <div class="controls-row">
+        <select id="cult-week">
+          <option value="all">All Weeks</option>
+          <option value="1">Week 1 – Foundations & Language</option>
+          <option value="2">Week 2 – Semiotics & Anatomy</option>
+          <option value="3">Week 3 – Nomadism & Tengrism</option>
+          <option value="4">Week 4 – Medieval Turkic Culture</option>
+        </select>
+        <select id="cult-type">
+          <option value="all">All Types</option>
+          <option value="Term">Terms</option>
+          <option value="Person">People & Works</option>
+          <option value="Quote">Quotes & Proverbs</option>
+        </select>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; color:var(--muted)">
+        <span id="cult-progress-text">Card 1 of 0</span>
+        <button id="btn-cult-known" class="btn btn-outline" style="padding:4px 10px; font-size:0.78rem;">Mark Known</button>
+      </div>
+      
+      <div class="bar"><div id="cult-progress-bar"></div></div>
+
+      <div class="flashcard-stage">
+        <div id="cult-card" class="flashcard">
+          <div style="display:flex; justify-content:space-between;">
+            <span id="cult-card-week" class="badge">Week 1</span>
+            <span id="cult-card-type" style="font-size:0.75rem; color:var(--muted)">Term</span>
+          </div>
+          <div id="cult-card-text" class="flashcard-text">Loading card...</div>
+          <div class="flashcard-foot">
+            <span id="cult-card-side">Tap to flip</span>
+            <span id="cult-card-status"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-nav">
+        <button id="btn-cult-prev" class="btn btn-outline">← Prev</button>
+        <button id="btn-cult-next" class="btn btn-primary">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. CALCULUS 1 QUIZ VIEW -->
+  <div id="view-calc-quiz" class="view">
+    <div class="panel">
+      <div class="controls-row">
+        <select id="calc-topic">
+          <option value="all">All Topics (Exam Review)</option>
+          <option value="inv_trig">Inverse Trig Derivatives</option>
+          <option value="exp_log">Exponential & Logarithmic</option>
+          <option value="hard_rules">Chain / Product / Quotient</option>
+          <option value="implicit">Implicit Differentiation</option>
+          <option value="limits">Limits & L'Hôpital</option>
+        </select>
+        <button id="btn-calc-next" class="btn btn-outline" style="flex:0 0 auto;">Next →</button>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="calc-category" class="badge">Category</span>
+        <span id="calc-score" style="font-size:0.85rem; color:var(--muted)">Score: 0/0</span>
+      </div>
+
+      <div class="problem-box">
+        <div style="font-size:0.82rem; color:var(--muted); margin-bottom:8px;">Find d/dx:</div>
+        <div id="calc-prompt"></div>
+      </div>
+
+      <div id="calc-options" class="options-grid"></div>
+
+      <div id="calc-solution" class="solution-box">
+        <h4 style="margin:0 0 8px; color:var(--accent);">Step-by-Step Breakdown</h4>
+        <div id="calc-steps"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. CALCULUS 1 CHEAT SHEET VIEW -->
+  <div id="view-calc-sheet" class="view">
+    <div class="panel">
+      <input type="search" id="calc-search" placeholder="Search formulas (e.g., arctan, ln, chain)...">
+      <div id="calc-sheet-list" style="margin-top:12px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ CULTURAL STUDIES DATA ============ */
+const CULTURAL_CARDS = [
+  {w:1,t:"Term",q:"Origin of the word “culture”",a:"Latin root colere = to inhabit, cultivate, or honor.\nCicero: cultura animi (“cultivation of the soul”).\nCorresponds to the Greek concept of Paideia."},
+  {w:1,t:"Term",q:"Paideia",a:"Greek concept: the formation and education of a citizen in the classical Greek polis.\nGoal: cultivate reason, appreciation of beauty, measure, and justice."},
+  {w:1,t:"Person",q:"Edward Burnett Tylor – definition of culture",a:"Primitive Culture (1871): culture is “that complex whole which includes knowledge, belief, art, law, morals, custom, and any other capabilities and habits acquired by man as a member of society.”"},
+  {w:1,t:"Term",q:"UNESCO definition of culture (1982)",a:"The distinct spiritual, material, intellectual, and emotional features characterizing a society."},
+  {w:1,t:"Term",q:"Sapir–Whorf Hypothesis",a:"Core idea: the structure and vocabulary of a language influence how its speakers perceive the world and shape culture."},
+  {w:1,t:"Term",q:"Ainalaiyn",a:"Kazakh untranslatable term representing deep affection, devotion, and care."},
+  
+  {w:2,t:"Term",q:"Semiotics",a:"The scientific study of signs, symbols, and signification."},
+  {w:2,t:"Person",q:"Ferdinand de Saussure – Sign structure",a:"Language is a system composed of signs.\nSign = Signifier (physical form) + Signified (mental concept)."},
+  {w:2,t:"Person",q:"Charles Sanders Peirce – Sign triad",a:"Classified signs into:\n1. Icon (resembles object)\n2. Index (causal connection, e.g. smoke = fire)\n3. Symbol (learned social agreement)"},
+  {w:2,t:"Person",q:"Roland Barthes – Mythologies",a:"Three levels of meaning: Denotation (literal) → Connotation (cultural association) → Myth (naturalized truth)."},
+  {w:2,t:"Person",q:"Olzhas Suleimenov – AZ i IA",a:"Re-examined The Tale of Igor’s Campaign highlighting Slavic and Turkic historical dual identities."},
+
+  {w:3,t:"Term",q:"The yurt (Kiiz ui)",a:"Portable, lightweight, easily assembled nomadic dwelling."},
+  {w:3,t:"Term",q:"Shanyrak",a:"Wooden dome of the yurt. Symbolizes the sun, family unity, and the universe."},
+  {w:3,t:"Term",q:"Tengrism",a:"Pre-Islamic worldview of Eurasian nomads centered on harmony with nature and the cosmos."},
+  {w:3,t:"Term",q:"Tengri & Umai",a:"Tengri = Deity of the Sky.\nUmai = Female deity protecting mothers, children, and fertility."},
+  {w:3,t:"Person",q:"Anacharsis (6th century BCE)",a:"Saka/Scythian philosopher, ranked among the Seven Sages of Antiquity."},
+
+  {w:4,t:"Person",q:"Abu Nasr al-Farabi (870–950 CE)",a:"Polymath born in Otrar. Known as the “Second Teacher” (after Aristotle). Author of Al-Madina al-Fadila (The Virtuous City)."},
+  {w:4,t:"Person",q:"Yusuf Balasaguni",a:"Author of Kutadgu Bilig (1069 CE - “Wisdom of Royal Glory”), a didactic ethical poem on governance."},
+  {w:4,t:"Person",q:"Mahmud al-Kashgari",a:"Author of Dīwān Lughāt al-Turk (1072 CE), the first comprehensive dictionary of Turkic languages and folklore."}
+];
+
+/* ============ CALCULUS DATABASE ============ */
+const CALC_PROBLEMS = [
+  {
+    topic: "inv_trig",
+    category: "Inverse Trig Derivatives",
+    prompt: "d/dx [ arctan(3x<sup>2</sup>) ]",
+    options: [
+      '<div class="frac"><span class="num">6x</span><span class="den">1 + 9x<sup>4</sup></span></div>',
+      '<div class="frac"><span class="num">3</span><span class="den">1 + 9x<sup>4</sup></span></div>',
+      '<div class="frac"><span class="num">6x</span><span class="den"><span class="sqrt">1 - 9x<sup>4</sup></span></span></div>',
+      '<div class="frac"><span class="num">1</span><span class="den">1 + 3x<sup>2</sup></span></div>'
+    ],
+    correct: 0,
+    steps: [
+      "Use Chain Rule: d/dx[arctan(u)] = u' / (1 + u<sup>2</sup>)",
+      "Set u = 3x<sup>2</sup>, so u<sup>2</sup> = 9x<sup>4</sup>",
+      "Derivative u' = 6x",
+      "Combine: 6x / (1 + 9x<sup>4</sup>)"
+    ]
+  },
+  {
+    topic: "inv_trig",
+    category: "Inverse Trig Derivatives",
+    prompt: "d/dx [ arcsin(e<sup>2x</sup>) ]",
+    options: [
+      '<div class="frac"><span class="num">2e<sup>2x</sup></span><span class="den"><span class="sqrt">1 - e<sup>4x</sup></span></span></div>',
+      '<div class="frac"><span class="num">e<sup>2x</sup></span><span class="den"><span class="sqrt">1 - e<sup>2x</sup></span></span></div>',
+      '<div class="frac"><span class="num">-2e<sup>2x</sup></span><span class="den"><span class="sqrt">1 - e<sup>4x</sup></span></span></div>',
+      '<div class="frac"><span class="num">2e<sup>2x</sup></span><span class="den">1 + e<sup>4x</sup></span></div>'
+    ],
+    correct: 0,
+    steps: [
+      "Formula: d/dx[arcsin(u)] = u' / <span class=\"sqrt\">1 - u<sup>2</sup></span>",
+      "Set u = e<sup>2x</sup>, u<sup>2</sup> = e<sup>4x</sup>, u' = 2e<sup>2x</sup>",
+      "Result: 2e<sup>2x</sup> / <span class=\"sqrt\">1 - e<sup>4x</sup></span>"
+    ]
+  },
+  {
+    topic: "exp_log",
+    category: "Exponential & Logarithmic",
+    prompt: "d/dx [ 5<sup>x<sup>2</sup></sup> ]",
+    options: [
+      '2x · 5<sup>x<sup>2</sup></sup> ln(5)',
+      'x<sup>2</sup> · 5<sup>x<sup>2</sup>-1</sup>',
+      '5<sup>x<sup>2</sup></sup> ln(5)',
+      '2x · 5<sup>x<sup>2</sup></sup>'
+    ],
+    correct: 0,
+    steps: [
+      "Formula: d/dx[a<sup>u</sup>] = a<sup>u</sup> ln(a) · u'",
+      "Set u = x<sup>2</sup>, u' = 2x, a = 5",
+      "Result: 2x · 5<sup>x<sup>2</sup></sup> ln(5)"
+    ]
+  },
+  {
+    topic: "hard_rules",
+    category: "Product / Chain Rule",
+    prompt: "d/dx [ x<sup>3</sup> · arctan(x) ]",
+    options: [
+      '3x<sup>2</sup> arctan(x) + <div class="frac"><span class="num">x<sup>3</sup></span><span class="den">1 + x<sup>2</sup></span></div>',
+      '<div class="frac"><span class="num">3x<sup>2</sup></span><span class="den">1 + x<sup>2</sup></span></div>',
+      '3x<sup>2</sup> arctan(x) - <div class="frac"><span class="num">x<sup>3</sup></span><span class="den">1 + x<sup>2</sup></span></div>',
+      '3x<sup>2</sup> + <div class="frac"><span class="num">1</span><span class="den">1 + x<sup>2</sup></span></div>'
+    ],
+    correct: 0,
+    steps: [
+      "Product Rule: (u·v)' = u'v + uv'",
+      "u = x<sup>3</sup> → u' = 3x<sup>2</sup>",
+      "v = arctan(x) → v' = 1 / (1 + x<sup>2</sup>)",
+      "Combine: 3x<sup>2</sup> arctan(x) + x<sup>3</sup> / (1 + x<sup>2</sup>)"
+    ]
+  },
+  {
+    topic: "implicit",
+    category: "Implicit Differentiation",
+    prompt: "Find dy/dx for x<sup>2</sup> + y<sup>2</sup> = 25 at (3, 4)",
+    options: [
+      '-3 / 4',
+      '-4 / 3',
+      '3 / 4',
+      '-3 / 5'
+    ],
+    correct: 0,
+    steps: [
+      "Differentiate: 2x + 2y(dy/dx) = 0",
+      "Solve for dy/dx = -x / y",
+      "Plug in x = 3, y = 4 → -3/4"
+    ]
+  },
+  {
+    topic: "limits",
+    category: "L'Hôpital's Rule",
+    prompt: "lim<sub>x→0</sub> (e<sup>2x</sup> - 1) / sin(3x)",
+    options: [
+      '2 / 3',
+      '0',
+      '1',
+      '3 / 2'
+    ],
+    correct: 0,
+    steps: [
+      "Indeterminate form 0/0. Apply L'Hôpital's Rule.",
+      "Numerator derivative: 2e<sup>2x</sup>",
+      "Denominator derivative: 3cos(3x)",
+      "Evaluate at x=0: 2(1) / 3(1) = 2/3"
+    ]
+  }
+];
+
+const CALC_SHEET = [
+  { title: "Arcsine Derivative", math: 'd/dx[arcsin(u)] = <div class="frac"><span class="num">u\'</span><span class="den"><span class="sqrt">1 - u<sup>2</sup></span></span></div>' },
+  { title: "Arccosine Derivative", math: 'd/dx[arccos(u)] = -<div class="frac"><span class="num">u\'</span><span class="den"><span class="sqrt">1 - u<sup>2</sup></span></span></div>' },
+  { title: "Arctangent Derivative", math: 'd/dx[arctan(u)] = <div class="frac"><span class="num">u\'</span><span class="den">1 + u<sup>2</sup></span></div>' },
+  { title: "Base-a Exponential", math: 'd/dx[a<sup>u</sup>] = a<sup>u</sup> ln(a) · u\'' },
+  { title: "Natural Logarithm", math: 'd/dx[ln|u|] = <div class="frac"><span class="num">u\'</span><span class="den">u</span></div>' },
+  { title: "Product Rule", math: 'd/dx[u · v] = u\'v + uv\'' },
+  { title: "Quotient Rule", math: 'd/dx[u / v] = <div class="frac"><span class="num">u\'v - uv\'</span><span class="den">v<sup>2</sup></span></div>' }
+];
+
+/* ================= STATE & LOGIC ================= */
+// Tabs
+const views = {
+  'tab-culture': 'view-culture',
+  'tab-calc-quiz': 'view-calc-quiz',
+  'tab-calc-sheet': 'view-calc-sheet'
+};
+
+Object.keys(views).forEach(tabId => {
+  document.getElementById(tabId).addEventListener('click', (e) => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    e.target.classList.add('active');
+    document.getElementById(views[tabId]).classList.add('active');
+  });
+});
+
+/* 1. CULTURAL STUDIES LOGIC */
+let cultIndex = 0;
+let cultFlipped = false;
+let cultKnown = new Set(JSON.parse(localStorage.getItem('cultKnown') || '[]'));
+
+function getFilteredCultCards() {
+  const w = document.getElementById('cult-week').value;
+  const t = document.getElementById('cult-type').value;
+  return CULTURAL_CARDS.filter(c => 
+    (w === 'all' || String(c.w) === w) &&
+    (t === 'all' || c.t === t)
+  );
+}
+
+function renderCultCard() {
+  const cards = getFilteredCultCards();
+  const cardEl = document.getElementById('cult-card');
+  
+  if (cards.length === 0) {
+    document.getElementById('cult-card-text').textContent = "No cards match filter.";
+    document.getElementById('cult-progress-text').textContent = "0 of 0";
+    return;
+  }
+
+  if (cultIndex >= cards.length) cultIndex = 0;
+  if (cultIndex < 0) cultIndex = cards.length - 1;
+
+  const card = cards[cultIndex];
+  cardEl.classList.toggle('flipped', cultFlipped);
+
+  document.getElementById('cult-card-week').textContent = `Week ${card.w}`;
+  document.getElementById('cult-card-type').textContent = card.t;
+  document.getElementById('cult-card-text').textContent = cultFlipped ? card.a : card.q;
+  document.getElementById('cult-card-side').textContent = cultFlipped ? "Answer" : "Question (Tap to flip)";
+  
+  const isKnown = cultKnown.has(`${card.w}-${card.q}`);
+  document.getElementById('btn-cult-known').textContent = isKnown ? "✓ Known" : "Mark Known";
+  document.getElementById('btn-cult-known').style.borderColor = isKnown ? "var(--ok)" : "var(--line)";
+
+  // Progress
+  document.getElementById('cult-progress-text').textContent = `Card ${cultIndex + 1} of ${cards.length}`;
+  document.getElementById('cult-progress-bar').style.width = `${((cultIndex + 1) / cards.length) * 100}%`;
+}
+
+document.getElementById('cult-card').addEventListener('click', () => {
+  cultFlipped = !cultFlipped;
+  renderCultCard();
+});
+
+document.getElementById('btn-cult-next').addEventListener('click', () => {
+  cultFlipped = false;
+  cultIndex++;
+  renderCultCard();
+});
+
+document.getElementById('btn-cult-prev').addEventListener('click', () => {
+  cultFlipped = false;
+  cultIndex--;
+  renderCultCard();
+});
+
+document.getElementById('btn-cult-known').addEventListener('click', () => {
+  const cards = getFilteredCultCards();
+  if (!cards.length) return;
+  const card = cards[cultIndex];
+  const key = `${card.w}-${card.q}`;
+  
+  if (cultKnown.has(key)) cultKnown.delete(key);
+  else cultKnown.add(key);
+
+  localStorage.setItem('cultKnown', JSON.stringify([...cultKnown]));
+  renderCultCard();
+});
+
+document.getElementById('cult-week').addEventListener('change', () => { cultIndex = 0; cultFlipped = false; renderCultCard(); });
+document.getElementById('cult-type').addEventListener('change', () => { cultIndex = 0; cultFlipped = false; renderCultCard(); });
+
+/* 2. CALCULUS QUIZ LOGIC */
+let calcIndex = 0;
+let calcScore = { correct: 0, total: 0 };
+
+function getCalcProblems() {
+  const topic = document.getElementById('calc-topic').value;
+  if (topic === 'all') return CALC_PROBLEMS;
+  return CALC_PROBLEMS.filter(p => p.topic === topic);
+}
+
+function loadCalcProblem() {
+  const problems = getCalcProblems();
+  if (!problems.length) return;
+
+  const problem = problems[calcIndex % problems.length];
+
+  document.getElementById('calc-category').textContent = problem.category;
+  document.getElementById('calc-prompt').innerHTML = problem.prompt;
+  document.getElementById('calc-solution').classList.remove('visible');
+
+  const optionsContainer = document.getElementById('calc-options');
+  optionsContainer.innerHTML = '';
+
+  problem.options.forEach((optHtml, idx) => {
+    const btn = document.createElement('div');
+    btn.className = 'option-btn';
+    btn.innerHTML = optHtml;
+    btn.addEventListener('click', () => handleCalcSelect(idx, problem.correct, btn));
+    optionsContainer.appendChild(btn);
+  });
+}
+
+function handleCalcSelect(selectedIdx, correctIdx, btnEl) {
+  const allBtns = document.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+  calcScore.total++;
+
+  if (selectedIdx === correctIdx) {
+    btnEl.classList.add('correct');
+    calcScore.correct++;
+  } else {
+    btnEl.classList.add('incorrect');
+    allBtns[correctIdx].classList.add('correct');
+  }
+
+  document.getElementById('calc-score').textContent = `Score: ${calcScore.correct}/${calcScore.total}`;
+
+  // Reveal steps
+  const problems = getCalcProblems();
+  const problem = problems[calcIndex % problems.length];
+  const stepsContainer = document.getElementById('calc-steps');
+  stepsContainer.innerHTML = '';
+
+  problem.steps.forEach((stepText, i) => {
+    const stepDiv = document.createElement('div');
+    stepDiv.style.marginBottom = '6px';
+    stepDiv.innerHTML = `<strong>Step ${i+1}:</strong> ${stepText}`;
+    stepsContainer.appendChild(stepDiv);
+  });
+
+  document.getElementById('calc-solution').classList.add('visible');
+}
+
+document.getElementById('btn-calc-next').addEventListener('click', () => {
+  calcIndex++;
+  loadCalcProblem();
+});
+
+document.getElementById('calc-topic').addEventListener('change', () => {
+  calcIndex = 0;
+  loadCalcProblem();
+});
+
+/* 3. CALCULUS SHEET LOGIC */
+function renderCalcSheet(filter = '') {
+  const container = document.getElementById('calc-sheet-list');
+  container.innerHTML = '';
+  
+  const query = filter.toLowerCase();
+  CALC_SHEET.filter(s => s.title.toLowerCase().includes(query)).forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'formula-card';
+    card.innerHTML = `
+      <div class="formula-title">${item.title}</div>
+      <div class="formula-math">${item.math}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+document.getElementById('calc-search').addEventListener('input', (e) => {
+  renderCalcSheet(e.target.value);
+});
+
+// Initial Setup
+window.onload = function() {
+  renderCultCard();
+  loadCalcProblem();
+  renderCalcSheet();
+};
+</script>
+</body>
+</html>
