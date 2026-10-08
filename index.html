@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Calculus 1 Derivatives & Formula Trainer</title>
+
+<!-- KaTeX CDN for math rendering -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-secondary: #0f172a;
+    --ink: #f8fafc;
+    --muted: #94a3b8;
+    --line: #334155;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-soft: rgba(59, 130, 246, 0.15);
+    --ok: #10b981;
+    --ok-soft: rgba(16, 185, 129, 0.15);
+    --warn: #f59e0b;
+    --warn-soft: rgba(245, 158, 11, 0.15);
+    --danger: #ef4444;
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .app-container {
+    width: 100%;
+    max-width: 760px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Header Navigation Tabs */
+  header {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin: 0 0 6px 0;
+    font-weight: 700;
+  }
+
+  header p {
+    margin: 0 0 16px 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .nav-tabs {
+    display: flex;
+    background: var(--card);
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    gap: 4px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 10px 12px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab-btn.active {
+    background: var(--accent);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  }
+
+  /* Views */
+  .view {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .view.active {
+    display: flex;
+  }
+
+  /* Card Container */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .controls-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  select {
+    flex: 1;
+    min-width: 160px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--card-secondary);
+    color: var(--ink);
+    font-size: 0.9rem;
+    outline: none;
+  }
+
+  /* Quiz Cards */
+  .problem-box {
+    background: var(--card-secondary);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+    margin: 10px 0 16px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow-x: auto;
+  }
+
+  .math-display {
+    font-size: 1.25rem;
+    margin: 8px 0;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  @media (min-width: 520px) {
+    .options-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .option-btn {
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--card-secondary);
+    color: var(--ink);
+    text-align: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: auto;
+  }
+
+  .option-btn:hover {
+    border-color: var(--accent);
+  }
+
+  .option-btn.correct {
+    background: var(--ok-soft) !important;
+    border-color: var(--ok) !important;
+    color: #4ade80 !important;
+  }
+
+  .option-btn.incorrect {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: var(--danger) !important;
+    color: #f87171 !important;
+  }
+
+  /* Explanation / Steps Box */
+  .solution-box {
+    display: none;
+    background: var(--card-secondary);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .solution-box.visible {
+    display: block;
+  }
+
+  .solution-box h4 {
+    margin: 0 0 8px 0;
+    color: var(--accent);
+    font-size: 0.95rem;
+  }
+
+  .step {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed var(--line);
+  }
+
+  .step:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  /* Cheat Sheet Formula Cards */
+  .formula-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 16px 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .formula-card {
+    background: var(--card-secondary);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .formula-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .formula-math {
+    font-size: 1.15rem;
+    overflow-x: auto;
+    padding: 4px 0;
+  }
+
+  .formula-note {
+    font-size: 0.82rem;
+    color: #cbd5e1;
+  }
+
+  .btn {
+    padding: 12px 16px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-outline { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+  .btn-outline:hover { border-color: var(--accent); }
+
+  .badge {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .search-box {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--card-secondary);
+    color: var(--ink);
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <header>
+    <h1>Calculus 1 Trainer</h1>
+    <p>Hard Derivatives, Inverse Functions & Limits Formula Practice</p>
+    
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button id="tab-quiz" class="tab-btn active">Practice Trainer</button>
+      <button id="tab-formulas" class="tab-btn">Formula Cheat Sheet</button>
+    </div>
+  </header>
+
+  <!-- 1. PRACTICE QUIZ VIEW -->
+  <div id="view-quiz" class="view active">
+    <div class="panel">
+      <div class="controls-row">
+        <select id="topic-select">
+          <option value="all">All Topics (Exam Review)</option>
+          <option value="inv_trig">Inverse Trig Derivatives</option>
+          <option value="exp_log">Exponential & Logarithmic</option>
+          <option value="hard_rules">Chain / Product / Quotient Rules</option>
+          <option value="implicit_log">Implicit & Logarithmic Differentiation</option>
+          <option value="limits">Limits & L'Hôpital's Rule</option>
+        </select>
+        <button id="btn-next-problem" class="btn btn-outline" style="flex:0 0 auto;">Skip / Next →</button>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="problem-category" class="badge">CATEGORY</span>
+        <span id="score-tracker" style="font-size:0.85rem; color:var(--muted)">Score: 0/0</span>
+      </div>
+
+      <!-- Problem Display -->
+      <div class="problem-box">
+        <div id="problem-prompt" style="font-size:0.95rem; color:var(--muted); margin-bottom:6px;">Find the derivative d/dx:</div>
+        <div id="problem-math" class="math-display"></div>
+      </div>
+
+      <!-- Multiple Choice Options -->
+      <div id="options-container" class="options-grid"></div>
+
+      <!-- Step-by-Step Explanation Box -->
+      <div id="solution-box" class="solution-box">
+        <h4>Step-by-Step Breakdown</h4>
+        <div id="solution-steps"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. FORMULA CHEAT SHEET VIEW -->
+  <div id="view-formulas" class="view">
+    <div class="panel">
+      <input type="text" id="formula-search" class="search-box" placeholder="Search formula (e.g., arctan, log, chain rule)...">
+      
+      <div id="formulas-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+/* ============ FORMULAS & PRACTICE DATABASE ============ */
+
+const FORMULA_DATABASE = [
+  {
+    category: "Inverse Trig Derivatives",
+    title: "Arcsine Derivative",
+    math: "\\frac{d}{dx}[\\arcsin(u)] = \\frac{1}{\\sqrt{1-u^2}} \\cdot \\frac{du}{dx}",
+    note: "Domain constraint: |u| < 1"
+  },
+  {
+    category: "Inverse Trig Derivatives",
+    title: "Arccosine Derivative",
+    math: "\\frac{d}{dx}[\\arccos(u)] = -\\frac{1}{\\sqrt{1-u^2}} \\cdot \\frac{du}{dx}",
+    note: "Differs from arcsin only by a negative sign"
+  },
+  {
+    category: "Inverse Trig Derivatives",
+    title: "Arctangent Derivative",
+    math: "\\frac{d}{dx}[\\arctan(u)] = \\frac{1}{1+u^2} \\cdot \\frac{du}{dx}",
+    note: "High yield on exams! No square root in denominator."
+  },
+  {
+    category: "Inverse Trig Derivatives",
+    title: "Arccotangent Derivative",
+    math: "\\frac{d}{dx}[\\operatorname{arccot}(u)] = -\\frac{1}{1+u^2} \\cdot \\frac{du}{dx}",
+    note: "Negative counterpart of arctan derivative."
+  },
+  {
+    category: "Inverse Trig Derivatives",
+    title: "Arcsecant Derivative",
+    math: "\\frac{d}{dx}[\\operatorname{arcsec}(u)] = \\frac{1}{|u|\\sqrt{u^2-1}} \\cdot \\frac{du}{dx}",
+    note: "Includes absolute value |u| in denominator."
+  },
+  {
+    category: "Exponential & Logarithmic",
+    title: "General Exponential Derivative (Base a)",
+    math: "\\frac{d}{dx}[a^u] = a^u \\ln(a) \\cdot \\frac{du}{dx}",
+    note: "Don't forget \\ln(a) factor when base is not e!"
+  },
+  {
+    category: "Exponential & Logarithmic",
+    title: "Natural Logarithm Derivative",
+    math: "\\frac{d}{dx}[\\ln|u|] = \\frac{1}{u} \\cdot \\frac{du}{dx} = \\frac{u'}{u}",
+    note: "Logarithmic derivative rule"
+  },
+  {
+    category: "Exponential & Logarithmic",
+    title: "General Logarithm Derivative (Base a)",
+    math: "\\frac{d}{dx}[\\log_a(u)] = \\frac{1}{u \\ln(a)} \\cdot \\frac{du}{dx}",
+    note: "Converts via change of base formula"
+  },
+  {
+    category: "Core Rules",
+    title: "Product Rule",
+    math: "\\frac{d}{dx}[f\\cdot g] = f'g + fg'",
+    note: "Left d-right + Right d-left"
+  },
+  {
+    category: "Core Rules",
+    title: "Quotient Rule",
+    math: "\\frac{d}{dx}\\left[\\frac{f}{g}\\right] = \\frac{f'g - fg'}{g^2}",
+    note: "(Low d-high minus High d-low) over Low squared"
+  },
+  {
+    category: "Core Rules",
+    title: "Chain Rule",
+    math: "\\frac{d}{dx}[f(g(x))] = f'(g(x)) \\cdot g'(x)",
+    note: "Differentiate outside function first, keep inside intact, multiply by derivative of inside."
+  },
+  {
+    category: "Limits & Continuity",
+    title: "L'Hôpital's Rule",
+    math: "\\lim_{x \\to c}\\frac{f(x)}{g(x)} = \\lim_{x \\to c}\\frac{f'(x)}{g'(x)}",
+    note: "ONLY applies for indeterminate forms 0/0 or ±∞/±∞!"
+  },
+  {
+    category: "Limits & Continuity",
+    title: "Fundamental Trig Limit",
+    math: "\\lim_{x \\to 0}\\frac{\\sin(x)}{x} = 1, \\quad \\lim_{x \\to 0}\\frac{1-\\cos(x)}{x} = 0",
+    note: "Key limits for deriving trig derivatives."
+  }
+];
+
+const PROBLEMS_DATABASE = [
+  /* INVERSE TRIG */
+  {
+    topic: "inv_trig",
+    category: "Inverse Trig Derivatives",
+    prompt: "Find \\frac{d}{dx}[\\arctan(3x^2)]:",
+    options: [
+      "\\frac{6x}{1 + 9x^4}",
+      "\\frac{3}{1 + 9x^4}",
+      "\\frac{6x}{\\sqrt{1 - 9x^4}}",
+      "\\frac{1}{1 + 3x^2}"
+    ],
+    correct: 0,
+    steps: [
+      "Use Chain Rule with arctan rule: \\frac{d}{dx}[\\arctan(u)] = \\frac{1}{1+u^2} \\cdot u'",
+      "Set u = 3x^2, so u^2 = (3x^2)^2 = 9x^4",
+      "Derivative of inside: u' = \\frac{d}{dx}[3x^2] = 6x",
+      "Combine: \\frac{1}{1+9x^4} \\cdot (6x) = \\frac{6x}{1+9x^4}"
+    ]
+  },
+  {
+    topic: "inv_trig",
+    category: "Inverse Trig Derivatives",
+    prompt: "Find \\frac{d}{dx}[\\arcsin(e^{2x})]:",
+    options: [
+      "\\frac{2e^{2x}}{\\sqrt{1 - e^{4x}}}",
+      "\\frac{e^{2x}}{\\sqrt{1 - e^{2x}}}",
+      "-\\frac{2e^{2x}}{\\sqrt{1 - e^{4x}}}",
+      "\\frac{2e^{2x}}{1 + e^{4x}}"
+    ],
+    correct: 0,
+    steps: [
+      "Formula: \\frac{d}{dx}[\\arcsin(u)] = \\frac{u'}{\\sqrt{1-u^2}}",
+      "Set u = e^{2x}. Then u^2 = (e^{2x})^2 = e^{4x}",
+      "Differentiate inside: u' = 2e^{2x}",
+      "Substitute: \\frac{2e^{2x}}{\\sqrt{1-e^{4x}}}"
+    ]
+  },
+  {
+    topic: "inv_trig",
+    category: "Inverse Trig Derivatives",
+    prompt: "Find \\frac{d}{dx}[\\arccos(\\ln(x))]:",
+    options: [
+      "-\\frac{1}{x\\sqrt{1 - (\\ln x)^2}}",
+      "\\frac{1}{x\\sqrt{1 - (\\ln x)^2}}",
+      "-\\frac{1}{1 + (\\ln x)^2}",
+      "-\\frac{\\ln x}{\\sqrt{1 - x^2}}"
+    ],
+    correct: 0,
+    steps: [
+      "Formula: \\frac{d}{dx}[\\arccos(u)] = -\\frac{u'}{\\sqrt{1-u^2}}",
+      "Set u = \\ln(x) \\implies u' = \\frac{1}{x}",
+      "Substitute: -\\frac{1/x}{\\sqrt{1 - (\\ln x)^2}} = -\\frac{1}{x\\sqrt{1 - (\\ln x)^2}}"
+    ]
+  },
+
+  /* EXPONENTIAL & LOGARITHMIC */
+  {
+    topic: "exp_log",
+    category: "Exponential & Logarithmic",
+    prompt: "Find \\frac{d}{dx}[5^{x^2}]:",
+    options: [
+      "2x \\cdot 5^{x^2} \\ln(5)",
+      "x^2 \\cdot 5^{x^2-1}",
+      "5^{x^2} \\ln(5)",
+      "2x \\cdot 5^{x^2}"
+    ],
+    correct: 0,
+    steps: [
+      "Use base-a exponential rule: \\frac{d}{dx}[a^u] = a^u \\ln(a) \\cdot u'",
+      "Set a = 5, u = x^2 \\implies u' = 2x",
+      "Substitute: 5^{x^2} \\cdot \\ln(5) \\cdot (2x) = 2x \\cdot 5^{x^2} \\ln(5)"
+    ]
+  },
+  {
+    topic: "exp_log",
+    category: "Exponential & Logarithmic",
+    prompt: "Find \\frac{d}{dx}[\\log_3(\\sin x)]:",
+    options: [
+      "\\frac{\\cot x}{\\ln 3}",
+      "\\frac{\\cos x}{\\sin x}",
+      "\\frac{1}{\\sin(x) \\ln 3}",
+      "\\frac{\\tan x}{\\ln 3}"
+    ],
+    correct: 0,
+    steps: [
+      "Formula: \\frac{d}{dx}[\\log_a(u)] = \\frac{u'}{u \\ln a}",
+      "Set u = \\sin(x) \\implies u' = \\cos(x)",
+      "Substitute: \\frac{\\cos x}{\\sin(x) \\ln 3} = \\frac{\\cot x}{\\ln 3}"
+    ]
+  },
+
+  /* HARD RULES (CHAIN / PRODUCT / QUOTIENT) */
+  {
+    topic: "hard_rules",
+    category: "Chain / Product / Quotient Rules",
+    prompt: "Find \\frac{d}{dx}[x^3 \\cdot \\arctan(x)]:",
+    options: [
+      "3x^2 \\arctan(x) + \\frac{x^3}{1+x^2}",
+      "\\frac{3x^2}{1+x^2}",
+      "3x^2 \\cdot \\frac{1}{1+x^2}",
+      "3x^2 \\arctan(x) - \\frac{x^3}{1+x^2}"
+    ],
+    correct: 0,
+    steps: [
+      "Use Product Rule: \\frac{d}{dx}[u \\cdot v] = u'v + uv'",
+      "Set u = x^3 \\implies u' = 3x^2",
+      "Set v = \\arctan(x) \\implies v' = \\frac{1}{1+x^2}",
+      "Combine: 3x^2 \\arctan(x) + x^3 \\left(\\frac{1}{1+x^2}\\right)"
+    ]
+  },
+
+  /* IMPLICIT & LOGARITHMIC DIFFERENTIATION */
+  {
+    topic: "implicit_log",
+    category: "Implicit Differentiation",
+    prompt: "Find \\frac{dy}{dx} for x^2 + y^2 = 25 at the point (3,4):",
+    options: [
+      "-\\frac{3}{4}",
+      "-\\frac{4}{3}",
+      "\\frac{3}{4}",
+      "-\\frac{3}{5}"
+    ],
+    correct: 0,
+    steps: [
+      "Differentiate implicitly with respect to x: \\frac{d}{dx}[x^2] + \\frac{d}{dx}[y^2] = \\frac{d}{dx}[25]",
+      "2x + 2y \\frac{dy}{dx} = 0",
+      "Solve for dy/dx: \\frac{dy}{dx} = -\\frac{2x}{2y} = -\\frac{x}{y}",
+      "Plug in (x=3, y=4): \\frac{dy}{dx} = -\\frac{3}{4}"
+    ]
+  },
+
+  /* LIMITS & L'HOPITAL */
+  {
+    topic: "limits",
+    category: "Limits & L'Hôpital's Rule",
+    prompt: "Evaluate \\lim_{x \\to 0} \\frac{e^{2x} - 1}{\\sin(3x)}:",
+    options: [
+      "\\frac{2}{3}",
+      "0",
+      "1",
+      "\\frac{3}{2}"
+    ],
+    correct: 0,
+    steps: [
+      "Direct substitution yields \\frac{e^0 - 1}{\\sin(0)} = \\frac{0}{0} (Indeterminate form)",
+      "Apply L'Hôpital's Rule: differentiate top and bottom separately.",
+      "Numerator derivative: \\frac{d}{dx}[e^{2x} - 1] = 2e^{2x}",
+      "Denominator derivative: \\frac{d}{dx}[\\sin(3x)] = 3\\cos(3x)",
+      "Evaluate limit: \\lim_{x \\to 0} \\frac{2e^{2x}}{3\\cos(3x)} = \\frac{2(1)}{3(1)} = \\frac{2}{3}"
+    ]
+  }
+];
+
+
+let currentProblemIndex = 0;
+let currentScore = { correct: 0, total: 0 };
+let activeTopic = "all";
+
+// DOM Handles
+const tabQuiz = document.getElementById('tab-quiz');
+const tabFormulas = document.getElementById('tab-formulas');
+const viewQuiz = document.getElementById('view-quiz');
+const viewFormulas = document.getElementById('view-formulas');
+
+const topicSelect = document.getElementById('topic-select');
+const problemCategory = document.getElementById('problem-category');
+const problemMath = document.getElementById('problem-math');
+const optionsContainer = document.getElementById('options-container');
+const solutionBox = document.getElementById('solution-box');
+const solutionSteps = document.getElementById('solution-steps');
+const scoreTracker = document.getElementById('score-tracker');
+const btnNext = document.getElementById('btn-next-problem');
+
+/* ============ TAB NAVIGATION ============ */
+tabQuiz.addEventListener('click', () => {
+  tabQuiz.classList.add('active');
+  tabFormulas.classList.remove('active');
+  viewQuiz.classList.add('active');
+  viewFormulas.classList.remove('active');
+});
+
+tabFormulas.addEventListener('click', () => {
+  tabFormulas.classList.add('active');
+  tabQuiz.classList.remove('active');
+  viewFormulas.classList.add('active');
+  viewQuiz.classList.remove('active');
+  renderFormulaList();
+});
+
+/* ============ QUIZ LOGIC ============ */
+function getFilteredProblems() {
+  if (activeTopic === "all") return PROBLEMS_DATABASE;
+  return PROBLEMS_DATABASE.filter(p => p.topic === activeTopic);
+}
+
+function loadProblem() {
+  const problems = getFilteredProblems();
+  if (problems.length === 0) return;
+
+  const problem = problems[currentProblemIndex % problems.length];
+
+  problemCategory.textContent = problem.category;
+  solutionBox.classList.remove('visible');
+  optionsContainer.innerHTML = '';
+
+  // Render main question LaTeX
+  katex.render(problem.prompt, problemMath, { throwOnError: false, displayMode: true });
+
+  // Render multiple choice options
+  problem.options.forEach((optText, index) => {
+    const btn = document.createElement('div');
+    btn.className = 'option-btn';
+    
+    const mathSpan = document.createElement('span');
+    katex.render(optText, mathSpan, { throwOnError: false });
+    btn.appendChild(mathSpan);
+
+    btn.addEventListener('click', () => handleAnswerSelect(index, problem.correct, btn));
+    optionsContainer.appendChild(btn);
+  });
+}
+
+function handleAnswerSelect(selectedIdx, correctIdx, btnEl) {
+  const allBtns = optionsContainer.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.style.pointerEvents = 'none'); // Disable further clicks
+
+  currentScore.total++;
+
+  if (selectedIdx === correctIdx) {
+    btnEl.classList.add('correct');
+    currentScore.correct++;
+  } else {
+    btnEl.classList.add('incorrect');
+    allBtns[correctIdx].classList.add('correct');
+  }
+
+  scoreTracker.textContent = `Score: ${currentScore.correct}/${currentScore.total}`;
+
+  // Reveal Step-by-Step Breakdown
+  const problems = getFilteredProblems();
+  const problem = problems[currentProblemIndex % problems.length];
+  
+  solutionSteps.innerHTML = '';
+  problem.steps.forEach((stepText, i) => {
+    const stepDiv = document.createElement('div');
+    stepDiv.className = 'step';
+    
+    // Process potential inline LaTeX inside steps
+    stepDiv.innerHTML = `<strong>Step ${i+1}:</strong> ${formatMathInText(stepText)}`;
+    solutionSteps.appendChild(stepDiv);
+  });
+
+  solutionBox.classList.add('visible');
+}
+
+function formatMathInText(text) {
+  // Simple regex converter for basic math formulas in explanation text
+  return text.replace(/\\\(.*?\\\)/g, match => {
+    const raw = match.substring(2, match.length - 2);
+    const span = document.createElement('span');
+    katex.render(raw, span, { throwOnError: false });
+    return span.outerHTML;
+  });
+}
+
+topicSelect.addEventListener('change', (e) => {
+  activeTopic = e.target.value;
+  currentProblemIndex = 0;
+  loadProblem();
+});
+
+btnNext.addEventListener('click', () => {
+  currentProblemIndex++;
+  loadProblem();
+});
+
+
+/* ============ FORMULA CHEAT SHEET LOGIC ============ */
+function renderFormulaList(filterQuery = '') {
+  const container = document.getElementById('formulas-list');
+  container.innerHTML = '';
+
+  const query = filterQuery.toLowerCase();
+  
+  const filtered = FORMULA_DATABASE.filter(f => 
+    f.title.toLowerCase().includes(query) ||
+    f.category.toLowerCase().includes(query) ||
+    f.note.toLowerCase().includes(query)
+  );
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--muted)">No matching formulas found.</div>`;
+    return;
+  }
+
+  let currentCat = '';
+
+  filtered.forEach(item => {
+    if (item.category !== currentCat) {
+      currentCat = item.category;
+      const catTitle = document.createElement('div');
+      catTitle.className = 'formula-section-title';
+      catTitle.textContent = currentCat;
+      container.appendChild(catTitle);
+    }
+
+    const card = document.createElement('div');
+    card.className = 'formula-card';
+
+    const title = document.createElement('div');
+    title.className = 'formula-title';
+    title.textContent = item.title;
+
+    const mathDiv = document.createElement('div');
+    mathDiv.className = 'formula-math';
+    katex.render(item.math, mathDiv, { throwOnError: false, displayMode: true });
+
+    const note = document.createElement('div');
+    note.className = 'formula-note';
+    note.textContent = `💡 ${item.note}`;
+
+    card.appendChild(title);
+    card.appendChild(mathDiv);
+    card.appendChild(note);
+
+    container.appendChild(card);
+  });
+}
+
+document.getElementById('formula-search').addEventListener('input', (e) => {
+  renderFormulaList(e.target.value);
+});
+
+// Initialize on Load
+window.onload = function() {
+  loadProblem();
+};
+</script>
+</body>
+</html>
